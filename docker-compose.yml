@@ -1,0 +1,14 @@
+version: '3.1'
+
+services:
+  mongodb:
+    image: mongodb/mongodb-community-server:latest
+    container_name: torneo_deportivo_mongo
+    environment:
+      MONGODB_INITDB_ROOT_USERNAME: admin
+      MONGODB_INITDB_ROOT_PASSWORD: admin123
+      MONGODB_INITDB_DATABASE: torneo_deportivo
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
