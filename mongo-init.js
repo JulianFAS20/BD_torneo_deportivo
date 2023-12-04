@@ -10,6 +10,16 @@ db.createUser({
     ]
 });
 
+// inicializar el conjunto de réplicas.
+rs.initiate({
+    _id: "myReplicaSet",
+    members: [
+      { _id: 0, host: "mongo-primary:27017" },
+      { _id: 1, host: "mongo-secondary-1:27017" },
+      { _id: 2, host: "mongo-secondary-2:27017" }
+    ]
+  });
+
 // Crear las colecciones (tablas) de la BD
 db.createCollection("deportistas");
 db.createCollection("entrenadores");
