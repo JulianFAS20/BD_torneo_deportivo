@@ -1,1 +1,0 @@
-chmod 400 /bd_torneo/secret-keyfile.txt

@@ -12,13 +12,13 @@ db.createUser({
 
 // inicializar el conjunto de réplicas.
 rs.initiate({
-    _id: "myReplicaSet",
+    _id: "rs0",
     members: [
-      { _id: 0, host: "mongo-primary:27017" },
-      { _id: 1, host: "mongo-secondary-1:27017" },
-      { _id: 2, host: "mongo-secondary-2:27017" }
+      { _id: 0, host: "torneo_deportivo_mongo_primary:27017" },
+      { _id: 1, host: "torneo_deportivo_mongo_secondary_1:27018" },
+      { _id: 2, host: "torneo_deportivo_mongo_secondary_2:27019" }
     ]
-  });
+});
 
 // Crear las colecciones (tablas) de la BD
 db.createCollection("deportistas");
