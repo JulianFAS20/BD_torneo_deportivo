@@ -1,60 +1,107 @@
-version: '3.1'
+version: '3.8'
+
+networks:
+  torneo_deportivo_network:
+    driver: bridge
+
+volumes:
+  vl_mongo_primary:
+    name: "vl_mongo_primary"
+ 
+  vl_secondary_1:
+    name: "vl_secondary_1"
+ 
+  vl_secondary_2:
+    name: "vl_secondary_2"
+
+  vl_mongo_config:
+    name: "vl_mongo_config"
 
 services:
   torneo_deportivo_mongo_primary:
     image: mongo:latest
-    hostname: torneo_deportivo_mongo_primary
     container_name: torneo_deportivo_mongo_primary
+    networks:
+      torneo_deportivo_network:
+    hostname: torneo_deportivo_mongo_primary
     ports:
       - "27017:27017"
     volumes:
-      - ./data/primary:/data/db
+      - vl_mongo_primary:/data/db
       - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
-      - ./secret-keyfile.txt:/bd_torneo/secret-keyfile.txt:ro
-    entrypoint: ["/usr/bin/mongod", "--bind_ip_all",
-                                       "--replSet", "rs0",
-                                       "--port", "27017" ]
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin123
       MONGO_INITDB_DATABASE: torneo_deportivo
+    restart: always
+    entrypoint: ["/usr/bin/mongod", "--bind_ip_all",
+                                       "--replSet", "rs0",
+                                       "--port", "27017" ]
     healthcheck:
-      test: test $$(echo "rs.initiate({_id:'my-replica-set',members:[{_id:0,host:\"mongo1:27017\"},{_id:1,host:\"mongo2:27018\"},{_id:2,host:\"mongo3:27019\"}]}).ok || rs.status().ok" | mongo --port 27017 --quiet) -eq 1
+      test: test $$(echo "rs.initiate({_id:'rs0',members:[{_id:0,host:\"torneo_deportivo_mongo_primary\"},{_id:1,host:\"torneo_deportivo_mongo_secondary_1\"},{_id:2,host:\"torneo_deportivo_mongo_secondary_2\"}]}).ok || rs.status().ok" | mongosh --port 27017 --quiet) -eq 1
       interval: 10s
       start_period: 30s
 
   torneo_deportivo_mongo_secondary_1:
     image: mongo:latest
-    hostname: torneo_deportivo_mongo_secondary_1
     container_name: torneo_deportivo_mongo_secondary_1
+    networks:
+      torneo_deportivo_network:
+    hostname: torneo_deportivo_mongo_secondary_1
     ports:
-      - "27018:27018"
+      - "27018:27017"
     volumes:
-      - ./data/secondary-1:/data/db
+      - vl_secondary_1:/data/db
       - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
-      - ./secret-keyfile.txt:/bd_torneo/secret-keyfile.txt:ro
-    entrypoint: ["/usr/bin/mongod", "--bind_ip_all",
-                                       "--replSet", "rs0",
-                                       "--port", "27017" ]
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin123
       MONGO_INITDB_DATABASE: torneo_deportivo
+    restart: always
+    entrypoint: ["/usr/bin/mongod", "--bind_ip_all", 
+                                       "--replSet", "rs0",
+                                       "--port", "27017" ]
+    
 
   torneo_deportivo_mongo_secondary_2:
     image: mongo:latest
-    hostname: torneo_deportivo_mongo_secondary_2
     container_name: torneo_deportivo_mongo_secondary_2
+    networks:
+      - torneo_deportivo_network
+    hostname: torneo_deportivo_mongo_secondary_2
     ports:
-      - "27019:27019"
+      - "27019:27017"
     volumes:
-      - ./data/secondary-2:/data/db
+      - vl_secondary_2:/data/db
       - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
-      - ./secret-keyfile.txt:/bd_torneo/secret-keyfile.txt:ro
-    entrypoint: ["/usr/bin/mongod", "--bind_ip_all",
-                                       "--replSet", "rs0",
-                                       "--port", "27017" ]
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: admin123
       MONGO_INITDB_DATABASE: torneo_deportivo
+    restart: always
+    entrypoint: ["/usr/bin/mongod", "--bind_ip_all",
+                                       "--replSet", "rs0",
+                                       "--port", "27017" ]
+    
+  
+  torneo_deportivo_mongo_config:
+    image: mongo:latest
+    container_name: torneo_deportivo_mongo_config
+    networks:
+      torneo_deportivo_network:
+    hostname: torneo_deportivo_mongo_config
+    ports:
+      - "27020:27017"
+    volumes:
+      - vl_mongo_config:/data/configdb
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin123
+      MONGO_INITDB_DATABASE: torneo_deportivo
+    restart: always
+    entrypoint: ["/usr/bin/mongod", "--bind_ip_all",
+                                       "--replSet", "rs0",
+                                       "--port", "27017",
+                                       "--configsvr"]
+

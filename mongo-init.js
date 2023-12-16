@@ -10,15 +10,14 @@ db.createUser({
     ]
 });
 
-// inicializar el conjunto de réplicas.
-rs.initiate({
-    _id: "rs0",
-    members: [
-      { _id: 0, host: "torneo_deportivo_mongo_primary:27017" },
-      { _id: 1, host: "torneo_deportivo_mongo_secondary_1:27018" },
-      { _id: 2, host: "torneo_deportivo_mongo_secondary_2:27019" }
-    ]
-});
+// inicializar el conjunto de replicas.
+//rs.initiate({_id:'rs0', members: [{ _id: 0, host: 'torneo_deportivo_mongo_primary' }, { _id: 1, host: 'torneo_deportivo_mongo_secondary_1' }, { _id: 2, host: 'torneo_deportivo_mongo_secondary_2' }]});
+//rs.initiate({_id:'dbrs', members: [{_id:0, host: 'mongo.one.db'},{_id:1, host: 'mongo.two.db'},{_id:2, host: 'mongo.three.db'}]})
+
+// Creacion de particiones o sharings
+sh.addShard("rs0/torneo_deportivo_mongo_primary")
+sh.addShard("rs0/torneo_deportivo_mongo_secondary_1")
+sh.addShard("rs0/torneo_deportivo_mongo_secondary_2")
 
 // Crear las colecciones (tablas) de la BD
 db.createCollection("deportistas");
@@ -128,6 +127,12 @@ var deportistasData = [
     }
 ];
 
+// Especificar la clave de shard para la colección
+db.deportistas.createIndex({ "edad": 1 })
+
+// Habilitar el sharding para la colección utilizando la clave de shard
+sh.shardCollection("torneo_deportivo.deportistas", { "edad": 1 })
+
 db.deportistas.insertMany(deportistasData);
 
 // Lista de entrenadores
@@ -182,9 +187,21 @@ var entrenadoresData = [
     }
 ];
 
+// Especificar la clave de shard para la colección
+db.entrenadores.createIndex({ "edad": 1 })
+
+// Habilitar el sharding para la colección utilizando la clave de shard
+sh.shardCollection("torneo_deportivo.entrenadores", { "edad": 1 })
+
 // Instrucción insertMany para insertar la lista de entrenadores en la colección
 db.entrenadores.insertMany(entrenadoresData);
-  
+
+// Especificar la clave de shard para la colección
+db.arbitros.createIndex({ "edad": 1 })
+
+// Habilitar el sharding para la colección utilizando la clave de shard
+sh.shardCollection("torneo_deportivo.arbitros", { "edad": 1 })
+
 // Instrucción insertOne para insertar cada uno de los arbitros
 db.arbitros.insertOne({ "nombres": "Carlos", "apellidos": "Gomez", "edad": 35, "anios_experiencia_arbitraje": 5 });
 db.arbitros.insertOne({ "nombres": "Ana", "apellidos": "Fernandez", "edad": 40, "anios_experiencia_arbitraje": 8 });

@@ -3,6 +3,8 @@
 - Tener instalado Docker Desktop
 - Tener git instalado para poder bajar el repositorio
 
+# Importante: Existe un archivo .bat que al ejecutarlo corre todo, la inicializacion de los servicios docker y la inicializar el conjunto de replicas.
+
 Este proyecto contiene un archivo docker-compose.yml que me permite levantar un servicio (contenedor) de MongoDB, el cual contiene una BD poblada con informacion relevante para un torneo_deportivo, para poder ejecutar los comandos de docker, debes abrir una terminal dentro de la carpeta descargada del repositorio
 
 Para levantar el servicio de docker usaremos el siguiente comando:
